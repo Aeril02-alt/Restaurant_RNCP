@@ -42,8 +42,8 @@ class Restaurant
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\OneToOne(inversedBy: 'restaurant', targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private User $owner;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $owner = null;
 
     #[ORM\OneToMany(mappedBy: 'restaurant', targetEntity: Picture::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $pictures;
@@ -132,18 +132,24 @@ class Restaurant
         return $this->updatedAt;
     }
 
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
     public function setUpdatedAt(\DateTimeInterface $dt): self
     {
         $this->updatedAt = $dt;
         return $this;
     }
 
-    public function getOwner(): User
+    public function getOwner(): ?User
     {
         return $this->owner;
     }
 
-    public function setOwner(User $u): self
+    public function setOwner(?User $u): self
     {
         $this->owner = $u;
         return $this;
