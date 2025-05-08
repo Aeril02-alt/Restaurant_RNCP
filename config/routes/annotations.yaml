@@ -1,0 +1,8 @@
+#config/routes/annotations.yaml
+# This file is part of the Symfony package.
+
+# config/routes/annotations.yaml
+controllers:
+    resource: '../../src/Controller/'
+    type: annotation
+    prefix: /api
