@@ -42,3 +42,10 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+        firewalls:
+            main:
+                # ...
+            stateless: true    
+            json_login:
+                    # api_login is a route we will create below
+                    check_path: app_api_login
