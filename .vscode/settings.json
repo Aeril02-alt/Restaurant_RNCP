@@ -3,6 +3,8 @@
         "Bienvenue",
         "hashers",
         "inversed",
+        "phpdoc",
+        "phpdocumentor",
         "Symfony"
     ]
 }

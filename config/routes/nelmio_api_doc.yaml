@@ -1,0 +1,11 @@
+# config/routes/nelmio_api_doc.yaml
+
+# JSON OpenAPI spec
+nelmio_api_doc_json:
+    path: /api/doc.json
+    controller: nelmio_api_doc.controller.swagger
+
+# Swagger UI
+nelmio_api_doc_ui:
+    path: /api/doc
+    controller: nelmio_api_doc.controller.swagger_ui
