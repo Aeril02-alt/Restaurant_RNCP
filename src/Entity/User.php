@@ -4,106 +4,150 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\DBAL\Types\Types;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::STRING, length: 36, unique: true)]
-    private string $uuid;
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
 
-    #[ORM\Column(type: Types::STRING, length: 32)]
-    private string $firstName;
-
-    #[ORM\Column(type: Types::STRING, length: 64)]
-    private string $lastName;
-
-    #[ORM\Column(type: Types::STRING, length: 64, unique: true)]
-    private string $email;
-
-    #[ORM\Column(type: Types::STRING, length: 255)]
-    private string $password;
-
-    #[ORM\Column(type: Types::JSON)]
+    #[ORM\Column]
     private array $roles = [];
 
-    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
-    private ?int $guestNumber = null;
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
+    private ?string $password = null;
 
-    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private ?string $allergy = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updateAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $createdAt;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $updatedAt = null;
-
-    #[ORM\OneToOne(mappedBy: 'owner', targetEntity: Restaurant::class, cascade: ['persist', 'remove'])]
-    private ?Restaurant $restaurant = null;
+    #[ORM\Column(length: 255)]
+    private ?string $apiToken = null;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->uuid      = Uuid::uuid4()->toString();
+        $this->apiToken = bin2hex(random_bytes(32));
     }
-
-    // … getters et setters pour chaque propriété …
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUuid(): string
+    public function getEmail(): ?string
     {
-        return $this->uuid;
+        return $this->email;
     }
 
-    public function getFirstName(): string
+    public function setEmail(string $email): static
     {
-        return $this->firstName;
-    }
+        $this->email = $email;
 
-    public function setFirstName(string $firstName): self
-    {
-        $this->firstName = $firstName;
         return $this;
     }
 
-    // idem pour lastName, email, password, roles, guestNumber, allergy...
-
-    public function getCreatedAt(): \DateTimeInterface
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
     {
-        return $this->createdAt;
+        return (string) $this->email;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier instead
+     */
+    public function getUsername(): string
     {
-        return $this->updatedAt;
+        return (string) $this->email;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $dt): self
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->updatedAt = $dt;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
         return $this;
     }
 
-    public function getRestaurant(): ?Restaurant
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
     {
-        return $this->restaurant;
+        return $this->password;
     }
 
-    public function setRestaurant(Restaurant $restaurant): self
+    public function setPassword(string $password): static
     {
-        $this->restaurant = $restaurant;
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * Returning a salt is only needed, if you are not using a modern
+     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     *
+     * @see UserInterface
+     */
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getUpdateAt(): ?\DateTimeImmutable
+    {
+        return $this->updateAt;
+    }
+
+    public function setUpdateAt(?\DateTimeImmutable $updateAt): static
+    {
+        $this->updateAt = $updateAt;
+
+        return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(string $apiToken): static
+    {
+        $this->apiToken = $apiToken;
+
         return $this;
     }
 }
