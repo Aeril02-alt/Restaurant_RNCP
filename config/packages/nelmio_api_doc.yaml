@@ -2,14 +2,68 @@
 nelmio_api_doc:
   documentation:
     openapi: 3.0.0
+
     info:
-      title:       "Mon API"
-      description: "Documentation auto-générée"
+      title:       "Restaurant API"
+      description: "Documentation de l'API Restaurant."
       version:     "1.0.0"
+
+    components:
+      securitySchemes:
+        X-AUTH-TOKEN:
+          type: apiKey
+          name: X-AUTH-TOKEN
+          in: header
+
+      schemas:
+        Restaurant:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: Chez Pierre
+            address:
+              type: string
+              example: 123 Main St
+            description:
+              type: string
+              example: Cuisine française authentique
+            createdAt:
+              type: string
+              format: date-time
+              example: "2025-05-09T12:34:56+00:00"
+
+        RestaurantInput:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Chez Pierre
+            address:
+              type: string
+              example: 123 Main St
+            description:
+              type: string
+              example: Cuisine française authentique
+
+    security:
+      - X-AUTH-TOKEN: []   # applique le schéma à toutes les routes par défaut
+
+    tags:
+      - name: "Authentication"
+        description: "Enregistrement et connexion des utilisateurs"
+      - name: "Restaurants"
+        description: "Opérations CRUD sur les restaurants"
+
     paths:
       /api/register:
         post:
-          summary: "Register a new user"
+          tags: [ "Authentication" ]
+          summary: "Enregistrer un nouvel utilisateur"
+          security: []   # endpoint public
           requestBody:
             required: true
             content:
@@ -26,7 +80,7 @@ nelmio_api_doc:
                       example: superSecret123
           responses:
             '201':
-              description: "User registered successfully"
+              description: "Enregistrement réussi"
               content:
                 application/json:
                   schema:
@@ -37,13 +91,147 @@ nelmio_api_doc:
                         example: user@example.com
                       apiToken:
                         type: string
-                        example: random_api_token
+                        example: a1b2c3d4e5f6...
                       roles:
                         type: array
                         items:
                           type: string
                           example: ROLE_USER
+            '400':
+              description: "Requête invalide"
+
+      /api/login:
+        post:
+          tags: [ "Authentication" ]
+          summary: "Authentifier un utilisateur"
+          security: []   # endpoint public
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: user@example.com
+                    password:
+                      type: string
+                      example: superSecret123
+          responses:
+            '200':
+              description: "Connexion réussie"
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      user:
+                        type: string
+                        example: user@example.com
+                      apiToken:
+                        type: string
+                        example: a1b2c3d4e5f6...
+                      roles:
+                        type: array
+                        items:
+                          type: string
+                          example: ROLE_USER
+            '401':
+              description: "Identifiants invalides"
+
+      /api/restaurant:
+        post:
+          tags: [ "Restaurants" ]
+          summary: "Créer un restaurant"
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/RestaurantInput"
+          responses:
+            '201':
+              description: "Restaurant créé"
+              headers:
+                Location:
+                  description: "URL du restaurant créé"
+                  schema:
+                    type: string
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Restaurant"
+            '400':
+              description: "Données invalides"
+
+      /api/restaurant/{id}/show:
+        get:
+          tags: [ "Restaurants" ]
+          summary: "Récupérer un restaurant par ID"
+          parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                type: integer
+                example: 1
+          responses:
+            '200':
+              description: "Restaurant trouvé"
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Restaurant"
+            '404':
+              description: "Restaurant non trouvé"
+
+      /api/restaurant/{id}/edit:
+        put:
+          tags: [ "Restaurants" ]
+          summary: "Mettre à jour un restaurant"
+          parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                type: integer
+                example: 1
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/RestaurantInput"
+          responses:
+            '200':
+              description: "Restaurant mis à jour"
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Restaurant"
+            '404':
+              description: "Restaurant non trouvé"
+
+      /api/restaurant/{id}/delete:
+        delete:
+          tags: [ "Restaurants" ]
+          summary: "Supprimer un restaurant"
+          parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                type: integer
+                example: 1
+          responses:
+            '204':
+              description: "Supprimé avec succès"
+            '404':
+              description: "Restaurant non trouvé"
 
   areas:
     default:
-      path_patterns: [ '^/' ]
+      path_patterns:
+        - ^/api(?!/doc$)   # inclut /api/* sauf /api/doc
