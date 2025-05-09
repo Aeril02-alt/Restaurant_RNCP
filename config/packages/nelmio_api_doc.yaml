@@ -1,9 +1,49 @@
+# config/packages/nelmio_api_doc.yaml
 nelmio_api_doc:
-    documentation:
-        info:
-            title:       « Mon API »
-            description: « Documentation auto-générée »
-            version:     « 1.0.0 »
-    areas:
-        default:
-            path_patterns: [ '^/' ]
+  documentation:
+    openapi: 3.0.0
+    info:
+      title:       "Mon API"
+      description: "Documentation auto-générée"
+      version:     "1.0.0"
+    paths:
+      /api/register:
+        post:
+          summary: "Register a new user"
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: user@example.com
+                    password:
+                      type: string
+                      example: superSecret123
+          responses:
+            '201':
+              description: "User registered successfully"
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      user:
+                        type: string
+                        example: user@example.com
+                      apiToken:
+                        type: string
+                        example: random_api_token
+                      roles:
+                        type: array
+                        items:
+                          type: string
+                          example: ROLE_USER
+
+  areas:
+    default:
+      path_patterns: [ '^/' ]
