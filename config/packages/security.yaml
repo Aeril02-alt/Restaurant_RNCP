@@ -1,56 +1,64 @@
+# config/packages/security.yaml
 security:
     enable_authenticator_manager: true
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+
+    # 1) Encodage des mots de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
+    # 2) Chargement des utilisateurs
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: email
+
+    # 3) Configuration des firewalls
     firewalls:
+        # Désactive la sécurité pour le profiler, assets, etc.
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        # Firewall principal pour toute la partie /api
         main:
-            pattern: ^/api
-            lazy: true
+            pattern:   ^/api
+            lazy:      true
             stateless: true
-            provider: app_user_provider
+            provider:  app_user_provider
+
+            # Votre authenticator perso pour les tokens API
             custom_authenticator: App\Security\ApiTokenAuthenticator
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+            # Activation du JSON login pour /api/login
+            json_login:
+                check_path: /api/login
+                username_path: email
+                password_path: password
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # 4) Règles d’accès
     access_control:
-         - { path: ^/api/register, roles : PUBLIC_ACCESS }
-         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-         - { path : ^/api/doc, roles : PUBLIC_ACCESS }
-         - { path: ^/api, roles : ROLE_USER }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/doc,      roles: PUBLIC_ACCESS }
+        - { path: ^/api,          roles: ROLE_USER }
 
+# 5) Overrides spécifiques à l’environnement “test”
 when@test:
     security:
+        # Ralentir moins le hasher pour accélérer les tests
         password_hashers:
-            # By default, password hashers are resource intensive and take time. This is
-            # important to generate secure password hashes. In tests however, secure hashes
-            # are not important, waste resources and increase test times. The following
-            # reduces the work factor to the lowest possible values.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4
+                time_cost: 3
+                memory_cost: 10
+
         firewalls:
             main:
-                # ...
-            stateless: true    
-            json_login:
-                    # api_login is a route we will create below
-                    check_path: app_api_login
+                # on réactive bien le même firewall “main” en test
+                stateless: true
+                json_login:
+                    check_path: /api/login
+                    username_path: email
+                    password_path: password
