@@ -1,6 +1,6 @@
 doctrine:
     dbal:
-        driver: 'pdo_pgsql'
+        driver: 'pdo_mysql'
         server_version: '16'
         charset: utf8
         url: '%env(resolve:DATABASE_URL)%'
@@ -20,7 +20,7 @@ doctrine:
 when@test:
     doctrine:
         dbal:
-            driver: 'pdo_pgsql'
+            driver: 'pdo_mysql'
             server_version: '16'
             charset: utf8
             url: '%env(resolve:DATABASE_URL)%'
