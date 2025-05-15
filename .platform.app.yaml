@@ -19,7 +19,7 @@ variables:
     env:
         APP_ENV: prod
         APP_SECRET: '1fa3212a3d0728cc119673b61e16e0e5'
-        DATABASE_URL: 'mysql://app:!ChangeMe!@database.internal:3306/app'
+        DATABASE_URL: 'mysql://Restaurant_user:azerty123@internal:3306/sf_restaurant?serverVersion=10.6&charset=utf8mb4'
 
 build:
     flavor: none
