@@ -1,7 +1,6 @@
-services:
-    mysql:
-        type: mysql:16
-        disk: 1024
-        configuration:
-            schemas:
-                - sf_restaurant
+mysql:
+    type: mysql:16
+    disk: 1024
+    configuration:
+        schemas:
+            - sf_restaurant
